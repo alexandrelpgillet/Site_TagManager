@@ -4,6 +4,23 @@
 
 
 
+        <!-- Consent Mode Default -->
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        
+        // Define default consent
+        gtag('consent', 'default', {
+            'ad_storage': 'denied',
+            'analytics_storage': 'denied',
+            'personalization_storage': 'denied',
+            'functionality_storage': 'denied',
+            'security_storage': 'granted',
+            'wait_for_update': 500
+        });
+    </script>
+    <!-- End Consent Mode Default -->
+
         <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -140,6 +157,54 @@
         footer a {
             color: var(--secondary-color);
         }
+
+        /* Banner de Consentimento */
+        #consent-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(44, 62, 80, 0.95);
+            color: white;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            text-align: center;
+            border-top: 3px solid var(--secondary-color);
+        }
+        #consent-banner p {
+            margin: 0 0 15px 0;
+            font-size: 0.9rem;
+            max-width: 800px;
+        }
+        .consent-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        .btn-consent {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: opacity 0.3s;
+        }
+        .btn-accept {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .btn-deny {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn-consent:hover {
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
@@ -217,9 +282,56 @@
         <p><a href="https://tagmanager.google.com/" target="_blank" id="footer-gtm-link">Acessar o Google Tag Manager</a></p>
     </footer>
 
+    <!-- Banner de Consentimento -->
+    <div id="consent-banner">
+        <p>Nós usamos cookies e tecnologias semelhantes para melhorar sua experiência em nosso site, analisar o tráfego e personalizar conteúdo. Ao clicar em "Aceitar Tudo", você concorda com o uso de todos os cookies.</p>
+        <div class="consent-buttons">
+            <button class="btn-consent btn-deny" onclick="updateConsent(false)">Recusar Todos</button>
+            <button class="btn-consent btn-accept" onclick="updateConsent(true)">Aceitar Tudo</button>
+        </div>
+    </div>
+
     <script>
         // Inicialização do DataLayer caso ainda não exista
         window.dataLayer = window.dataLayer || [];
+
+        // Função para atualizar o consentimento no GTM
+        function updateConsent(accepted) {
+            const consentState = accepted ? 'granted' : 'denied';
+            
+            console.log(`Consentimento atualizado para: ${consentState}`);
+            
+            gtag('consent', 'update', {
+                'ad_storage': consentState,
+                'analytics_storage': consentState,
+                'personalization_storage': consentState,
+                'functionality_storage': consentState,
+                'security_storage': 'granted'
+            });
+
+            // Esconde o banner
+            document.getElementById('consent-banner').style.display = 'none';
+            
+            // Salvar no localStorage para persistência
+            localStorage.setItem('consent_choice', accepted ? 'accepted' : 'denied');
+        }
+
+        // Verifica se o usuário já fez uma escolha anteriormente
+        window.addEventListener('DOMContentLoaded', () => {
+            const previousChoice = localStorage.getItem('consent_choice');
+            if (previousChoice) {
+                document.getElementById('consent-banner').style.display = 'none';
+                
+                const state = previousChoice === 'accepted' ? 'granted' : 'denied';
+                gtag('consent', 'update', {
+                    'ad_storage': state,
+                    'analytics_storage': state,
+                    'personalization_storage': state,
+                    'functionality_storage': state,
+                    'security_storage': 'granted'
+                });
+            }
+        });
 
         // Função para simular a adição ao carrinho e enviar dados para o DataLayer
         function addToCart(id, name, price, category) {
@@ -268,6 +380,6 @@
             document.getElementById('form-mensagem').style.display = 'block';
             console.log('Formulário enviado com sucesso e evento disparado para o dataLayer.');
         });
-    </>
+    </script>
 </body>
 </html>
